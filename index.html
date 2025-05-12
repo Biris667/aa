@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livestock Control System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4CAF50;
+            --primary-dark: #388E3C;
+            --primary-light: #C8E6C9;
+            --secondary: #FFC107;
+            --secondary-dark: #FFA000;
+            --accent: #2196F3;
+            --text-primary: #212121;
+            --text-secondary: #757575;
+            --divider: #BDBDBD;
+            --background: #FAFAFA;
+            --surface: #FFFFFF;
+            --error: #F44336;
+            --success: #4CAF50;
+            --warning: #FF9800;
+            --border-radius: 16px;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.08);
+            --shadow-lg: 0 10px 20px rgba(0,0,0,0.1), 0 6px 6px rgba(0,0,0,0.05);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .app-container {
+            max-width: 428px;
+            min-height: 100vh;
+            margin: 0 auto;
+            background-color: var(--surface);
+            position: relative;
+            overflow-x: hidden;
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* Header Styles */
+        .app-header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow-md);
+        }
+
+        .header-title {
+            font-size: 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 16px;
+        }
+
+        /* Button Styles */
+        .btn {
+            border: none;
+            border-radius: 50px;
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary);
+            color: rgba(0, 0, 0, 0.87);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--secondary-dark);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            padding: 0;
+        }
+
+        .btn-fab {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            padding: 0;
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 10;
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* Card Styles */
+        .card {
+            background-color: var(--surface);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            overflow: hidden;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        .card-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--divider);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-body {
+            padding: 16px;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        /* Camera Styles */
+        .camera-container {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 4/3;
+            background-color: #000;
+            overflow: hidden;
+        }
+
+        #cameraFeed {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .camera-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 16px;
+        }
+
+        .camera-controls {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+        }
+
+        /* Results Styles */
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            padding: 16px;
+        }
+
+        .result-card {
+            background-color: var(--surface);
+            border-radius: var(--border-radius);
+            padding: 16px;
+            text-align: center;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .result-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .result-value {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--divider);
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px var(--primary-light);
+        }
+
+        /* List Styles */
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            border-bottom: 1px solid var(--divider);
+            transition: var(--transition);
+        }
+
+        .list-item:hover {
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+
+        .list-item-content {
+            flex: 1;
+        }
+
+        .list-item-title {
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .list-item-subtitle {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        /* Utility Classes */
+        .hidden {
+            display: none !important;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .mt-2 {
+            margin-top: 8px;
+        }
+
+        .mb-2 {
+            margin-bottom: 8px;
+        }
+
+        .p-4 {
+            padding: 16px;
+        }
+
+        /* Animation Classes */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 480px) {
+            .app-container {
+                border-radius: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-title">
+                <span class="material-icons-round">pets</span>
+                <span>Livestock Control</span>
+            </div>
+            <div class="header-actions">
+                <button id="menuBtn" class="btn-icon" style="color: white;">
+                    <span class="material-icons-round">menu</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="app-content">
+            <!-- Scanner Section -->
+            <section id="scannerSection" class="p-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Animal Scanner</h3>
+                        <span class="material-icons-round" style="color: var(--primary);">photo_camera</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="camera-container">
+                            <video id="cameraFeed" autoplay playsinline></video>
+                            <div class="camera-overlay">
+                                <div></div>
+                                <div class="camera-controls">
+                                    <button id="startCameraBtn" class="btn btn-primary btn-icon">
+                                        <span class="material-icons-round">cameraswitch</span>
+                                    </button>
+                                    <button id="captureBtn" class="btn btn-secondary btn-icon" disabled>
+                                        <span class="material-icons-round">camera</span>
+                                    </button>
+                                    <button id="analyzeBtn" class="btn btn-primary btn-icon" disabled>
+                                        <span class="material-icons-round">search</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results Section (Initially Hidden) -->
+                <div id="resultsSection" class="hidden fade-in mt-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Scan Results</h3>
+                            <span class="material-icons-round" style="color: var(--accent);">analytics</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="results-grid">
+                                <div class="result-card">
+                                    <div class="result-label">Estimated Weight</div>
+                                    <div id="estimatedWeight" class="result-value">-- kg</div>
+                                </div>
+                                <div class="result-card">
+                                    <div class="result-label">Estimated Size</div>
+                                    <div id="estimatedSize" class="result-value">-- cm</div>
+                                </div>
+                            </div>
+                            <button id="registerBtn" class="btn btn-primary w-full mt-4">
+                                <span class="material-icons-round">save</span>
+                                Register Animal
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Registration Form (Initially Hidden) -->
+            <section id="registrationSection" class="hidden p-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Register New Animal</h3>
+                        <span class="material-icons-round" style="color: var(--primary);">edit</span>
+                    </div>
+                    <div class="card-body">
+                        <form id="registrationForm">
+                            <div class="form-group">
+                                <label class="form-label">Animal ID</label>
+                                <input type="text" id="animalId" class="form-control" placeholder="e.g. BOV-001" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Animal Type</label>
+                                <select id="animalType" class="form-control" required>
+                                    <option value="">Select type...</option>
+                                    <option value="bovine">Bovine</option>
+                                    <option value="porcine">Porcine</option>
+                                    <option value="ovine">Ovine</option>
+                                    <option value="caprine">Caprine</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Weight (kg)</label>
+                                <input type="number" id="animalWeight" class="form-control" step="0.1" placeholder="e.g. 250.5" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Size (cm)</label>
+                                <input type="number" id="animalSize" class="form-control" step="0.1" placeholder="e.g. 120.3" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Scan Date</label>
+                                <input type="date" id="scanDate" class="form-control" required>
+                            </div>
+                            <div style="display: flex; gap: 8px; margin-top: 16px;">
+                                <button type="button" id="cancelBtn" class="btn btn-secondary" style="flex: 1;">
+                                    Cancel
+                                </button>
+                                <button type="submit" class="btn btn-primary" style="flex: 1;">
+                                    Save Record
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Records Section (Initially Hidden) -->
+            <section id="recordsSection" class="hidden p-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Animal Records</h3>
+                        <span class="material-icons-round" style="color: var(--accent);">list_alt</span>
+                    </div>
+                    <div class="card-body">
+                        <div id="recordsList">
+                            <!-- Records will be dynamically inserted here -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Floating Action Button -->
+        <button id="newScanBtn" class="btn btn-primary btn-fab hidden">
+            <span class="material-icons-round">add</span>
+        </button>
+    </div>
+
+    <!-- TensorFlow.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.12.0/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
+    
+    <!-- OpenCV.js -->
+    <script async src="https://docs.opencv.org/4.5.5/opencv.js" onload="onOpenCvReady();" type="text/javascript"></script>
+
+    <script>
+        // State Management
+        const state = {
+            videoStream: null,
+            model: null,
+            cvReady: false,
+            records: JSON.parse(localStorage.getItem('livestockRecords')) || [],
+            currentScan: null
+        };
+
+        // DOM Elements
+        const elements = {
+            scannerSection: document.getElementById('scannerSection'),
+            resultsSection: document.getElementById('resultsSection'),
+            registrationSection: document.getElementById('registrationSection'),
+            recordsSection: document.getElementById('recordsSection'),
+            cameraFeed: document.getElementById('cameraFeed'),
+            startCameraBtn: document.getElementById('startCameraBtn'),
+            captureBtn: document.getElementById('captureBtn'),
+            analyzeBtn: document.getElementById('analyzeBtn'),
+            registerBtn: document.getElementById('registerBtn'),
+            newScanBtn: document.getElementById('newScanBtn'),
+            menuBtn: document.getElementById('menuBtn'),
+            cancelBtn: document.getElementById('cancelBtn'),
+            registrationForm: document.getElementById('registrationForm'),
+            estimatedWeight: document.getElementById('estimatedWeight'),
+            estimatedSize: document.getElementById('estimatedSize'),
+            animalId: document.getElementById('animalId'),
+            animalType: document.getElementById('animalType'),
+            animalWeight: document.getElementById('animalWeight'),
+            animalSize: document.getElementById('animalSize'),
+            scanDate: document.getElementById('scanDate'),
+            recordsList: document.getElementById('recordsList')
+        };
+
+        // Initialize Date Field
+        elements.scanDate.valueAsDate = new Date();
+
+        // OpenCV Ready Callback
+        function onOpenCvReady() {
+            state.cvReady = true;
+            console.log('OpenCV.js is ready');
+            showToast('Computer vision system ready', 'success');
+        }
+
+        // Load TensorFlow Model
+        async function loadModel() {
+            try {
+                showToast('Loading AI model...', 'info');
+                state.model = await cocoSsd.load();
+                console.log('Model loaded successfully');
+                showToast('AI model loaded', 'success');
+                return true;
+            } catch (error) {
+                console.error('Error loading model:', error);
+                showToast('Failed to load AI model', 'error');
+                return false;
+            }
+        }
+
+        // Start Camera
+        async function startCamera() {
+            try {
+                // Check for camera permissions
+                if (navigator.permissions) {
+                    const permissionStatus = await navigator.permissions.query({ name: 'camera' });
+                    if (permissionStatus.state === 'denied') {
+                        showToast('Camera access denied. Please enable camera permissions.', 'error');
+                        return;
+                    }
+                }
+
+                // Stop existing stream if any
+                if (state.videoStream) {
+                    state.videoStream.getTracks().forEach(track => track.stop());
+                }
+
+                // Get camera access
+                state.videoStream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        facingMode: 'environment',
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    },
+                    audio: false
+                });
+
+                elements.cameraFeed.srcObject = state.videoStream;
+                elements.captureBtn.disabled = false;
+                elements.analyzeBtn.disabled = false;
+
+                // Load model if not already loaded
+                if (!state.model) {
+                    await loadModel();
+                }
+
+                showToast('Camera started', 'success');
+            } catch (error) {
+                console.error('Camera error:', error);
+                if (error.name === 'NotAllowedError') {
+                    showToast('Camera access denied', 'error');
+                } else {
+                    showToast('Failed to start camera', 'error');
+                }
+            }
+        }
+
+        // Capture Image
+        function captureImage() {
+            const canvas = document.createElement('canvas');
+            canvas.width = elements.cameraFeed.videoWidth;
+            canvas.height = elements.cameraFeed.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(elements.cameraFeed, 0, 0, canvas.width, canvas.height);
+
+            // Store the captured image
+            state.currentScan = {
+                image: canvas,
+                capturedAt: new Date()
+            };
+
+            // Show results section
+            elements.resultsSection.classList.remove('hidden');
+            elements.newScanBtn.classList.remove('hidden');
+            showToast('Image captured', 'success');
+        }
+
+        // Analyze Image
+        async function analyzeImage() {
+            if (!state.currentScan || !state.currentScan.image) {
+                showToast('No image captured', 'error');
+                return;
+            }
+
+            if (!state.cvReady) {
+                showToast('Computer vision not ready', 'error');
+                return;
+            }
+
+            try {
+                showToast('Analyzing image...', 'info');
+
+                // Process with OpenCV
+                const src = cv.imread(state.currentScan.image);
+                const dst = new cv.Mat();
+                
+                // Convert to grayscale
+                cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY);
+                
+                // Apply adaptive threshold
+                cv.threshold(dst, dst, 0, 255, cv.THRESH_BINARY_INV + cv.THRESH_OTSU);
+                
+                // Find contours
+                let contours = new cv.MatVector();
+                let hierarchy = new cv.Mat();
+                cv.findContours(dst.clone(), contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
+                
+                // Draw contours on original image
+                cv.drawContours(src, contours, -1, [0, 255, 0, 255], 2);
+                
+                // Detect objects with TensorFlow
+                if (state.model) {
+                    const predictions = await state.model.detect(state.currentScan.image);
+                    processPredictions(predictions);
+                }
+
+                showToast('Analysis complete', 'success');
+            } catch (error) {
+                console.error('Analysis error:', error);
+                showToast('Analysis failed', 'error');
+            }
+        }
+
+        // Process Predictions
+        function processPredictions(predictions) {
+            let estimatedWeight = 0;
+            let estimatedSize = 0;
+
+            if (predictions.length > 0) {
+                // Find the prediction with highest confidence
+                const bestPrediction = predictions.reduce((prev, current) => 
+                    (prev.score > current.score) ? prev : current
+                );
+
+                // Calculate area of bounding box
+                const area = bestPrediction.bbox[2] * bestPrediction.bbox[3];
+                
+                // Simple estimation formulas (should be calibrated with real data)
+                estimatedWeight = Math.round(area * 0.02 * 100) / 100; // kg
+                estimatedSize = Math.round(Math.sqrt(area) * 0.5); // cm
+            }
+
+            // Update UI
+            elements.estimatedWeight.textContent = `${estimatedWeight} kg`;
+            elements.estimatedSize.textContent = `${estimatedSize} cm`;
+
+            // Store estimates for registration
+            state.currentScan.estimatedWeight = estimatedWeight;
+            state.currentScan.estimatedSize = estimatedSize;
+        }
+
+        // Show Registration Form
+        function showRegistrationForm() {
+            if (!state.currentScan) {
+                showToast('No scan data available', 'error');
+                return;
+            }
+
+            // Generate animal ID
+            elements.animalId.value = `LS-${Date.now().toString().slice(-6)}`;
+            
+            // Pre-fill with scan data
+            if (state.currentScan.estimatedWeight) {
+                elements.animalWeight.value = state.currentScan.estimatedWeight;
+            }
+            if (state.currentScan.estimatedSize) {
+                elements.animalSize.value = state.currentScan.estimatedSize;
+            }
+
+            // Show form
+            elements.scannerSection.classList.add('hidden');
+            elements.resultsSection.classList.add('hidden');
+            elements.registrationSection.classList.remove('hidden');
+            elements.newScanBtn.classList.add('hidden');
+        }
+
+        // Save Animal Record
+        function saveAnimalRecord(event) {
+            event.preventDefault();
+
+            const record = {
+                id: elements.animalId.value,
+                type: elements.animalType.value,
+                weight: parseFloat(elements.animalWeight.value),
+                size: parseFloat(elements.animalSize.value),
+                scanDate: elements.scanDate.value,
+                recordedAt: new Date().toISOString()
+            };
+
+            // Validate
+            if (!record.id || !record.type || isNaN(record.weight) || isNaN(record.size)) {
+                showToast('Please fill all fields', 'error');
+                return;
+            }
+
+            // Add to records
+            state.records.push(record);
+            localStorage.setItem('livestockRecords', JSON.stringify(state.records));
+
+            // Show success
+            showToast('Record saved', 'success');
+
+            // Go to records section
+            showRecordsSection();
+        }
+
+        // Show Records Section
+        function showRecordsSection() {
+            // Hide other sections
+            elements.scannerSection.classList.add('hidden');
+            elements.resultsSection.classList.add('hidden');
+            elements.registrationSection.classList.add('hidden');
+            
+            // Show records section
+            elements.recordsSection.classList.remove('hidden');
+            elements.newScanBtn.classList.remove('hidden');
+
+            // Load records
+            loadRecords();
+        }
+
+        // Load Records
+        function loadRecords() {
+            elements.recordsList.innerHTML = '';
+
+            if (state.records.length === 0) {
+                elements.recordsList.innerHTML = `
+                    <div style="text-align: center; padding: 24px; color: var(--text-secondary);">
+                        <span class="material-icons-round" style="font-size: 48px; margin-bottom: 8px;">inbox</span>
+                        <p>No records found</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Sort by date (newest first)
+            const sortedRecords = [...state.records].sort((a, b) => 
+                new Date(b.recordedAt) - new Date(a.recordedAt)
+            );
+
+            // Create list items
+            sortedRecords.forEach(record => {
+                const item = document.createElement('div');
+                item.className = 'list-item';
+                item.innerHTML = `
+                    <div class="list-item-content">
+                        <div class="list-item-title">${record.id} • ${record.type}</div>
+                        <div class="list-item-subtitle">
+                            ${record.weight} kg • ${record.size} cm • ${new Date(record.scanDate).toLocaleDateString()}
+                        </div>
+                    </div>
+                    <button class="btn-icon" onclick="deleteRecord('${record.id}')" style="color: var(--error);">
+                        <span class="material-icons-round">delete</span>
+                    </button>
+                `;
+                elements.recordsList.appendChild(item);
+            });
+        }
+
+        // Delete Record
+        function deleteRecord(id) {
+            state.records = state.records.filter(record => record.id !== id);
+            localStorage.setItem('livestockRecords', JSON.stringify(state.records));
+            loadRecords();
+            showToast('Record deleted', 'warning');
+        }
+
+        // New Scan
+        function newScan() {
+            // Reset state
+            state.currentScan = null;
+            
+            // Hide other sections
+            elements.resultsSection.classList.add('hidden');
+            elements.registrationSection.classList.add('hidden');
+            elements.recordsSection.classList.add('hidden');
+            
+            // Show scanner
+            elements.scannerSection.classList.remove('hidden');
+            elements.newScanBtn.classList.add('hidden');
+            
+            // Reset UI
+            elements.estimatedWeight.textContent = '-- kg';
+            elements.estimatedSize.textContent = '-- cm';
+        }
+
+        // Show Toast Notification
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast-notification toast-${type}`;
+            toast.innerHTML = `
+                <span class="material-icons-round" style="margin-right: 8px;">
+                    ${type === 'error' ? 'error' : 
+                      type === 'success' ? 'check_circle' : 
+                      type === 'warning' ? 'warning' : 'info'}
+                </span>
+                ${message}
+            `;
+            
+            // Style the toast based on type
+            toast.style.position = 'fixed';
+            toast.style.bottom = '24px';
+            toast.style.left = '50%';
+            toast.style.transform = 'translateX(-50%)';
+            toast.style.backgroundColor = 
+                type === 'error' ? 'var(--error)' :
+                type === 'success' ? 'var(--success)' :
+                type === 'warning' ? 'var(--warning)' : 'var(--accent)';
+            toast.style.color = 'white';
+            toast.style.padding = '12px 24px';
+            toast.style.borderRadius = '50px';
+            toast.style.display = 'flex';
+            toast.style.alignItems = 'center';
+            toast.style.boxShadow = 'var(--shadow-lg)';
+            toast.style.zIndex = '1000';
+            toast.style.animation = 'fadeIn 0.3s ease-in-out';
+            
+            document.body.appendChild(toast);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                toast.style.animation = 'fadeOut 0.3s ease-in-out';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Event Listeners
+        elements.startCameraBtn.addEventListener('click', startCamera);
+        elements.captureBtn.addEventListener('click', captureImage);
+        elements.analyzeBtn.addEventListener('click', analyzeImage);
+        elements.registerBtn.addEventListener('click', showRegistrationForm);
+        elements.newScanBtn.addEventListener('click', newScan);
+        elements.menuBtn.addEventListener('click', showRecordsSection);
+        elements.cancelBtn.addEventListener('click', newScan);
+        elements.registrationForm.addEventListener('submit', saveAnimalRecord);
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            // Load model
+            loadModel();
+            
+            // Set current date
+            elements.scanDate.valueAsDate = new Date();
+        });
+    </script>
+</body>
+</html>
